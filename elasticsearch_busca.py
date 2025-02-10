@@ -6,6 +6,7 @@ from collections import Counter
 from elasticsearch import Elasticsearch
 import matplotlib.pyplot as plt
 import json
+import glob
 
 
 es = Elasticsearch("http://localhost:9200")
@@ -43,7 +44,6 @@ def get_suspicious_documents(directory_path, limit=64):
     return relevant_documents
 
 
-
 def expand_with_synonyms(word, max_synonyms=5):
     synonyms = set()
     count = 0
@@ -58,7 +58,6 @@ def expand_with_synonyms(word, max_synonyms=5):
     return synonyms
 
 
-# Função de pré-processamento para Abordagem 4
 def preprocess_approach_4(content, stop_words, top_n_terms):
     tokens = word_tokenize(content.lower())
 
@@ -75,7 +74,6 @@ def preprocess_approach_4(content, stop_words, top_n_terms):
     return expanded_terms
 
 
-
 def preprocess_approach_6(content, stop_words, top_n_terms):
     tokens = word_tokenize(content.lower())
     tokens = [word for word in tokens if word.isalnum() and word not in stop_words]
@@ -90,6 +88,7 @@ def preprocess_approach_6(content, stop_words, top_n_terms):
         expanded_terms.update(expand_with_synonyms(term))
 
     return expanded_terms
+
 
 def search_documents(file_paths, index_name, approach, top_n_terms=10):
     total_preprocessing_time = 0
@@ -174,6 +173,7 @@ def search_documents(file_paths, index_name, approach, top_n_terms=10):
 
     return results
 
+
 def calculate_precision_recall_at_k(relevant_documents, retrieved_documents, k_values):
     relevant_files = []
 
@@ -202,7 +202,7 @@ def calculate_precision_recall_at_k(relevant_documents, retrieved_documents, k_v
 
     return precision_results, recall_results
 
-# Função principal
+
 def calculoPrecision(relevant_documents, retrieved_documents_approach4, retrieved_documents_approach6):
     k_values = [2, 4, 6, 8, 10]
 
@@ -234,69 +234,14 @@ def calculoPrecision(relevant_documents, retrieved_documents_approach4, retrieve
 
 if __name__ == "__main__":
 
-    file_paths = [
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part1\\suspicious-document00079.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part1\\suspicious-document00413.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part10\\suspicious-document04595.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part10\\suspicious-document04636.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part10\\suspicious-document04786.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part10\\suspicious-document04823.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part12\\suspicious-document05709.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part12\\suspicious-document05791.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part12\\suspicious-document05841.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part13\\suspicious-document06342.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part13\\suspicious-document06500.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part14\\suspicious-document06610.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part14\\suspicious-document06618.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part14\\suspicious-document06657.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part14\\suspicious-document06874.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part15\\suspicious-document07042.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part15\\suspicious-document07141.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part15\\suspicious-document07225.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part15\\suspicious-document07321.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part15\\suspicious-document07385.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part15\\suspicious-document07467.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part16\\suspicious-document07521.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part16\\suspicious-document07590.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part16\\suspicious-document07677.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part17\\suspicious-document08001.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part17\\suspicious-document08002.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part17\\suspicious-document08137.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part17\\suspicious-document08205.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part18\\suspicious-document08716.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part18\\suspicious-document08721.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part18\\suspicious-document08984.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part19\\suspicious-document09029.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part19\\suspicious-document09356.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part19\\suspicious-document09432.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part19\\suspicious-document09467.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part19\\suspicious-document09472.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part2\\suspicious-document00563.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part2\\suspicious-document00574.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part2\\suspicious-document00637.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part2\\suspicious-document00713.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part2\\suspicious-document00816.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part2\\suspicious-document00976.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part20\\suspicious-document09514.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part20\\suspicious-document09897.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part21\\suspicious-document10242.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part21\\suspicious-document10292.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part21\\suspicious-document10375.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part21\\suspicious-document10497.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part22\\suspicious-document10628.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part22\\suspicious-document10701.txt",
-        "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document\\part22\\suspicious-document10854.txt"
-    ]
-
+	base_path = "C:\\Users\\zin\\Downloads\\pan-plagiarism-corpus-2011\\external-detection-corpus\\suspicious-document"
+	file_paths = glob.glob(os.path.join(base_path, "part*", "*.txt"))
     index_name = "index"
-
+   
     retrieved_documents_approach4 = search_documents(file_paths, index_name, approach=4, top_n_terms=10)
-
     retrieved_documents_approach6 = search_documents(file_paths, index_name, approach=6, top_n_terms=10)
-
+   
     directory = r'C:\Users\zin\Downloads\pan-plagiarism-corpus-2011'
-
-
     relevant_documents = get_suspicious_documents(directory, limit=64)
 
     calculoPrecision(relevant_documents, retrieved_documents_approach4, retrieved_documents_approach6)

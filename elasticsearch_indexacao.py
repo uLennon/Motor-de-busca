@@ -3,8 +3,6 @@ import time
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk, BulkIndexError
 
-
-
 es = Elasticsearch("http://localhost:9200")
 
 def read_large_file(file_path):
@@ -16,13 +14,11 @@ def read_large_file(file_path):
         return content
 
 
-
 def index_documents(folder_path, index_name):
     actions = []
     total_preprocessing_time = 0
     total_indexing_time = 0
     total_documents = 0
-
 
     for root, dirs, files in os.walk(folder_path):
         for file in files:
@@ -33,7 +29,6 @@ def index_documents(folder_path, index_name):
                 preprocessing_time = time.time() - start_preprocessing_time
                 total_preprocessing_time += preprocessing_time
 
-
                 action = {
                     "_index": index_name,
                     "_source": {
@@ -43,7 +38,6 @@ def index_documents(folder_path, index_name):
                 }
                 actions.append(action)
                 total_documents += 1
-
 
                 if len(actions) >= 50:
                     try:
@@ -77,7 +71,7 @@ def index_documents(folder_path, index_name):
 
 if __name__ == "__main__":
     start_time = time.time()
-    folder_path = r'C:\Users\zin\Downloads\pan-plagiarism-corpus-2011\external-detection-corpus\source-document'  # Atualize com o caminho correto da sua pasta
+    folder_path = r'C:\Users\zin\Downloads\pan-plagiarism-corpus-2011\external-detection-corpus\source-document' 
     index_name = 'index'
 
     index_documents(folder_path, index_name)
